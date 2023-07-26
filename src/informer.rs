@@ -7,7 +7,7 @@ use std::path::Path;
 
 
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub(crate) struct File {
     name: String,
     size: String,
@@ -38,24 +38,24 @@ impl File {
 
 impl Display for File {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-        let horizontal_line = "─".repeat(65);
-
         let name_line = format!("│ {:^63.63} │", self.name);
         let size_line = format!("│ Size: {:<57} │", self.size);
         let permissions = self.permissions
             .iter()
             .map(|perm| match perm {
-                Some(perm) => format!("{}", perm),
+                Some(perm) => perm.to_string(),
                 None => "".to_string(),
             })
             .collect::<Vec<_>>()
             .join("+");
         let permissions_line = format!("│ Permissions: {:<50} │", permissions);
-        let kind_line = format!("│ Type: {:<57} │", self.kind);
+        let kind_line = format!("│ Type: {:<57} │", self.kind.to_string());
         let created_line = format!("│ Created: {:<54} │", self.date.created);
         let modified_line = format!("│ Modified: {:<53} │", self.date.modified);
         let accessed_line = format!("│ Accessed: {:<53} │", self.date.accessed);
 
+
+        let horizontal_line = "─".repeat(65);
 
         write!(f, "╭{}╮\n", horizontal_line)?;
         write!(f, "{}\n", name_line)?;
@@ -71,7 +71,7 @@ impl Display for File {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub(crate) enum FilePermissions {
     Read,
     Write,
@@ -113,7 +113,7 @@ impl Display for FilePermissions {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub(crate) enum FileKind {
     Regular,
     Folder,
@@ -144,7 +144,7 @@ impl Display for FileKind {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub(crate) struct FileDate {
     created: String,
     modified: String,
