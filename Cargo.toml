@@ -2,7 +2,10 @@
 name = "prop"
 version = "0.1.0"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+license = "AGPL-3.0-only"
+repository = "https://github.com/fidelicura/prop"
+authors = ["Kirill 'fidelicura' Bezuglyi <fidelicura@gmail.com>"]
+description = "Lighweight, nice and distro-agnostic CLI app for viewing info about files!"
 
 [dependencies]
+time = { version = "0.3.23", features = ["std", "local-offset"] }

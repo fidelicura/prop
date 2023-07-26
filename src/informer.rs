@@ -1,7 +1,8 @@
 use std::fs::{File as RawFile, Permissions, Metadata, FileType};
 use std::fmt::{Result as FmtResult, Formatter, Display};
 use std::os::unix::prelude::PermissionsExt;
-use std::time::{UNIX_EPOCH, SystemTime};
+use time::{Duration, OffsetDateTime, UtcOffset};
+use std::time::SystemTime;
 use std::path::Path;
 
 
@@ -150,17 +151,32 @@ pub(crate) struct FileDate {
     accessed: String,
 }
 
+impl FileDate {
+    fn parse_time(systime: SystemTime, epoch: OffsetDateTime) -> String {
+        let utc = epoch + Duration::try_from(systime.duration_since(epoch.into()).unwrap())
+            .unwrap();
+        let local = utc.to_offset(UtcOffset::local_offset_at(utc).unwrap());
+
+        let date = local.date();
+        let time = local.time();
+
+        format!("{} {}", date, time)
+    }
+}
+
 impl From<Metadata> for FileDate {
     fn from(value: Metadata) -> Self {
+        let epoch = OffsetDateTime::UNIX_EPOCH;
+
         let created = value
             .created()
-            .map_or_else(|_| "unknown".to_string(), |val| format!("{:?}", val));
+            .map_or_else(|_| "unknown".to_string(), |val| Self::parse_time(val, epoch));
         let modified = value
             .modified()
-            .map_or_else(|_| "unknown".to_string(), |val| format!("{:?}", val));
+            .map_or_else(|_| "unknown".to_string(), |val| Self::parse_time(val, epoch));
         let accessed = value
             .modified()
-            .map_or_else(|_| "unknown".to_string(), |val| format!("{:?}", val));
+            .map_or_else(|_| "unknown".to_string(), |val| Self::parse_time(val, epoch));
 
         Self { created, modified, accessed }
     }

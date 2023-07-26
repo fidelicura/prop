@@ -1,6 +1,3 @@
-#![allow(unused)]
-
-
 mod informer;
 mod parser;
 
