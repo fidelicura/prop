@@ -1,7 +1,7 @@
 use std::fs::{File as RawFile, Permissions, Metadata, FileType};
 use std::fmt::{Result as FmtResult, Formatter, Display};
-use std::os::unix::prelude::PermissionsExt;
 use time::{Duration, OffsetDateTime, UtcOffset};
+use std::os::unix::prelude::PermissionsExt;
 use std::time::SystemTime;
 use std::path::Path;
 
@@ -27,12 +27,36 @@ impl File {
         let name = path
             .file_name()
             .map_or_else(|| "unknown".to_owned(), |val| val.to_str().unwrap().to_owned());
-        let size = format!("{} MB", (metadata.len() as f32 / 1024. / 1024.));
+        let size = Self::determine_size(metadata.len());
         let permissions = FilePermissions::new(metadata.permissions());
         let kind = FileKind::from(metadata.file_type());
         let date = FileDate::from(metadata);
 
         Self { name, size, permissions, kind, date }
+    }
+
+    fn determine_size(value: u64) -> String {
+        let size = value as f32;
+        let byte_limit = 1024 as f32;
+        let kb_limit = byte_limit * 1024_f32;
+        let mb_limit = kb_limit * 1024_f32;
+        let gb_limit = mb_limit * 1024_f32;
+
+        if size < byte_limit {
+            format!("{} bytes", size / 1024.)
+        } else if size < kb_limit {
+            let kilobytes = size / 1024 as f32;
+            format!("{} KB", kilobytes)
+        } else if size < mb_limit {
+            let megabytes = size / (1024 * 1024) as f32;
+            format!("{} MB", megabytes)
+        } else if (size as f64) < gb_limit as f64 {
+            let gigabytes = size / (1024 * 1024 * 1024) as f32;
+            format!("{} GB", gigabytes)
+        } else {
+            let terabytes = (size as f64) / (1024_u64 * 1024_u64 * 1024_u64 * 1024_u64) as f64;
+            format!("{} TB", terabytes)
+        }
     }
 }
 
