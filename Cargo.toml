@@ -9,3 +9,9 @@ description = "Lighweight, nice and distro-agnostic CLI app for viewing info abo
 
 [dependencies]
 time = { version = "0.3.23", features = ["std", "local-offset"] }
+
+[profile.release]
+lto = true
+opt-level = 3
+panic = "unwind"
+codegen-units = 1
